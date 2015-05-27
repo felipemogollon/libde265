@@ -215,6 +215,9 @@ public:
     if (cIdx==0) return BitDepth_Y;
     else         return BitDepth_C;
   }
+
+  int getChromaWidthShift()  const { return SubWidthC -1; }
+  int getChromaHeightShift() const { return SubHeightC-1; }
 };
 
 de265_error read_scaling_list(bitreader*, const seq_parameter_set*, scaling_list_data*, bool inPPS);

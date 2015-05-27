@@ -343,10 +343,10 @@ void fill_border_samples(de265_image* img, int xB,int yB,
   // number of pixels that are in the valid image area to the right and to the bottom
 
   int nBottom = sps->pic_height_in_luma_samples - (cIdx==0 ? yB : 2*yB);
-  if (cIdx) nBottom=(nBottom+1)/2;
+  if (cIdx) nBottom=(nBottom+1)/2; // TODO
   if (nBottom>2*nT) nBottom=2*nT;
   int nRight  = sps->pic_width_in_luma_samples  - (cIdx==0 ? xB : 2*xB);
-  if (cIdx) nRight =(nRight +1)/2;
+  if (cIdx) nRight =(nRight +1)/2; // TODO
   if (nRight >2*nT) nRight=2*nT;
 
   int nAvail=0;

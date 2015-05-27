@@ -3371,6 +3371,8 @@ int read_transform_unit(thread_context* tctx,
 
   // --- chroma ---
 
+  const int yOffset422 = 1<<log2TrafoSizeC;
+
   if (log2TrafoSize>2 || ChromaArrayType == CHROMA_444) {
     // TODO: cross-component prediction
 
@@ -3386,8 +3388,6 @@ int read_transform_unit(thread_context* tctx,
 
     // 4:2:2
     if (ChromaArrayType == CHROMA_422) {
-      const int yOffset = 1<<log2TrafoSizeC;
-
       if (cbf_cb & 2) {
         if ((err=residual_coding(tctx,
                                  x0,y0,//+(1<<log2TrafoSize),
@@ -3396,7 +3396,7 @@ int read_transform_unit(thread_context* tctx,
       }
 
       decode_TU(tctx,
-                x0/SubWidthC,(y0+yOffset)/SubHeightC,
+                x0/SubWidthC,y0/SubHeightC + yOffset422,
                 xCUBase/SubWidthC,yCUBase/SubHeightC,
                 nTC, 1, cuPredMode, cbf_cb & 2);
     }
@@ -3415,8 +3415,6 @@ int read_transform_unit(thread_context* tctx,
 
     // 4:2:2
     if (ChromaArrayType == CHROMA_422) {
-      const int yOffset = 1<<log2TrafoSizeC;
-
       if (cbf_cr & 2) {
         if ((err=residual_coding(tctx,
                                  x0,y0,//+(1<<log2TrafoSize),
@@ -3425,43 +3423,55 @@ int read_transform_unit(thread_context* tctx,
       }
 
       decode_TU(tctx,
-                x0/SubWidthC,(y0+yOffset)/SubHeightC,
+                x0/SubWidthC,y0/SubHeightC + yOffset422,
                 xCUBase/SubWidthC,yCUBase/SubHeightC,
                 nTC, 2, cuPredMode, cbf_cr & 2);
     }
   }
   else if (blkIdx==3) {
+    assert(false); // TMP
+
     if (cbf_cb & 1) {
       if ((err=residual_coding(tctx,xBase,yBase,xBase-xCUBase,yBase-yCUBase,
                                log2TrafoSize,1)) != DE265_OK) return err;
     }
+
+    decode_TU(tctx,
+              xBase/SubWidthC,yBase/SubHeightC,
+              xCUBase/SubWidthC,yCUBase/SubHeightC, nTC, 1, cuPredMode, cbf_cb);
+
     // 4:2:2
     if (cbf_cb & 2) {
       if ((err=residual_coding(tctx,
-                               xBase        ,yBase        +(1<<log2TrafoSizeC),
-                               xBase-xCUBase,yBase-yCUBase+(1<<log2TrafoSizeC),
+                               xBase        ,yBase,
+                               xBase-xCUBase,yBase-yCUBase,
                                log2TrafoSize,1)) != DE265_OK) return err;
     }
+
+    decode_TU(tctx,
+              xBase/SubWidthC,yBase/SubHeightC+yOffset422,
+              xCUBase/SubWidthC,yCUBase/SubHeightC, nTC, 1, cuPredMode, cbf_cb);
+
 
     if (cbf_cr & 1) {
       if ((err=residual_coding(tctx,xBase,yBase,xBase-xCUBase,yBase-yCUBase,
                                log2TrafoSize,2)) != DE265_OK) return err;
     }
+
+    decode_TU(tctx,
+              xBase/SubWidthC,yBase/SubHeightC,
+              xCUBase/SubWidthC,yCUBase/SubHeightC, nTC, 2, cuPredMode, cbf_cr);
+
     // 4:2:2
     if (cbf_cr & 2) {
       if ((err=residual_coding(tctx,
-                               xBase        ,yBase        +(1<<log2TrafoSizeC),
-                               xBase-xCUBase,yBase-yCUBase+(1<<log2TrafoSizeC),
+                               xBase        ,yBase,
+                               xBase-xCUBase,yBase-yCUBase,
                                log2TrafoSize,2)) != DE265_OK) return err;
     }
 
-    assert(false); // TMP
-
     decode_TU(tctx,
-              xBase/SubWidthC,yBase/SubHeightC,
-              xCUBase/SubWidthC,yCUBase/SubHeightC, nTC, 1, cuPredMode, cbf_cb);
-    decode_TU(tctx,
-              xBase/SubWidthC,yBase/SubHeightC,
+              xBase/SubWidthC,yBase/SubHeightC+yOffset422,
               xCUBase/SubWidthC,yCUBase/SubHeightC, nTC, 2, cuPredMode, cbf_cr);
   }
 
